@@ -6,39 +6,47 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  Menu,
-  MenuItem,
   Box,
   Button,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Drawer,
+  List,
+  ListItem
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { usePathname } from "next/navigation";
+import CloseIcon from "@mui/icons-material/Close";
+import { usePathname, useRouter } from "next/navigation";
 
-export default function MuiNavbar() {
-  const [anchorEl, setAnchorEl] = useState(null);
+export default function Navbar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const pathname = usePathname();
+  const router = useRouter();
 
   // Handle hydration
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenuOpen = () => {
+    setMobileMenuOpen(true);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
+    setMobileMenuOpen(false);
+  };
+
+  const handleNavigation = (href) => {
+    router.push(href);
+    handleMenuClose();
   };
 
   const menuItems = [
     { label: "Home", href: "/" },
-    { label: "Components", href: "/components" },
+    { label: "List", href: "/list" },
     { label: "About", href: "/about" }
   ];
 
@@ -57,10 +65,9 @@ export default function MuiNavbar() {
           component="div" 
           sx={{ 
             flexGrow: 1,
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 'bold'
+            color: "white",
+            fontWeight: 'bold',
+            textShadow: '1px 2px 5px #000000',
           }}
         >
           React Learning Project
@@ -78,34 +85,60 @@ export default function MuiNavbar() {
             >
               <MenuIcon />
             </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
+            <Drawer
+              anchor="top"
+              open={mobileMenuOpen}
               onClose={handleMenuClose}
               sx={{
-                '& .MuiPaper-root': {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white'
+                '& .MuiDrawer-paper': {
+                  width: 'auto',
+                  marginLeft: 'auto',
+                  backgroundColor: 'white',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
                 }
               }}
             >
-              {menuItems.map((item) => (
-                <MenuItem
-                  key={item.label}
+              <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
+                <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+                  Menu
+                </Typography>
+                <IconButton
                   onClick={handleMenuClose}
-                  component={Button}
-                  href={item.href}
-                  sx={{
-                    color: 'inherit',
+                  sx={{ 
+                    color: '#1976d2',
+                    transition: 'transform 0.5s ease',
                     '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      transform: 'rotate(180deg)',
+                      backgroundColor: 'rgba(25, 118, 210, 0.1)'
                     }
                   }}
                 >
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Menu>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <List sx={{ py: 2 }}>
+                {menuItems.map((item) => (
+                  <ListItem
+                    key={item.label}
+                    onClick={() => handleNavigation(item.href)}
+                    sx={{
+                      textAlign: 'center',
+                      color: '#1976d2',
+                      fontSize: '1.1rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      py: 1.5,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.1)'
+                      }
+                    }}
+                  >
+                    {item.label}
+                  </ListItem>
+                ))}
+              </List>
+            </Drawer>
           </>
         ) : (
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -113,7 +146,7 @@ export default function MuiNavbar() {
               <Button
                 key={item.label}
                 color="inherit"
-                href={item.href}
+                onClick={() => router.push(item.href)}
                 sx={{
                   position: 'relative',
                   '&::after': {
