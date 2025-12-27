@@ -1,4 +1,4 @@
-import MuiNavbar from "@/components/MuiNavbar";
+import Navbar from "@/components/ReusableComponents/Navbar";
 import Count from "@/components/Count";
 import UserCard from "@/components/UserCard";
 import TodoList from "@/components/TodoList";
@@ -6,7 +6,7 @@ import TodoList from "@/components/TodoList";
 export default function Home() {
   return (
     <main>
-      <MuiNavbar />
+      <Navbar />
       <h1 className="text-3xl font-bold text-center mb-8">Welcome to Next.js</h1>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

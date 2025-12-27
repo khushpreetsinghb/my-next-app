@@ -10,7 +10,7 @@ export default function UserCard({ name, email, role, avatar, isActive = true })
   };
 
   return (
-    <div className="border-2 border-green-500 p-4 rounded-lg mb-8 max-w-xs">
+    <div className="border-2 border-green-500 p-4 rounded-lg mb-8 max-w-md">
       <h3 className="text-lg font-bold mb-4">UserCard Component - Props & Conditional Rendering</h3>
       
       <div className="flex items-center mb-4">
