@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import EmotionRegistry from "./emotion-registry";
+import Navbar from "@/components/ReusableComponents/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <EmotionRegistry>
+          <Navbar />
           {children}
         </EmotionRegistry>
       </body>
