@@ -7,6 +7,8 @@ export default function UserCard({ name, email, role, avatar, isActive = true })
 
   const toggleFollow = () => {
     setIsFollowing(!isFollowing);
+    // Show an alert when button is clicked.
+    // alert(`Button clicked! Following status: ${!isFollowing ? 'Now following' : 'No longer following'}`);
   };
 
   return (

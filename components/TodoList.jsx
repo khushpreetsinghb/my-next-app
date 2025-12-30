@@ -8,6 +8,10 @@ export default function TodoList() {
     { id: 2, text: "Create components", completed: true },
     { id: 3, text: "Understand state management", completed: false }
   ]);
+  
+  // list of fruits - demonstrating array mapping with keys
+  const fruits = ["apple", "banana", "orange", "grape", "strawberry"];
+
   const [newTodo, setNewTodo] = useState("");
 
   const addTodo = () => {
@@ -98,6 +102,14 @@ export default function TodoList() {
       <p className="mt-4 text-sm text-gray-600">
         This component demonstrates: lists, keys, array methods, conditional rendering
       </p>
+      {/* <div className="mt-4">
+        <h4 className="font-semibold mb-2">Fruits List:</h4>
+        <ul className="list-[square] list-inside text-sm">
+          {fruits.map((fruit, index) => (
+            <li key={index}>{fruit}</li>
+          ))}
+        </ul>
+      </div> */}
     </div>
   );
 }
