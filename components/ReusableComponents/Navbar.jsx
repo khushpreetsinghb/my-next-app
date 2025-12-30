@@ -47,7 +47,8 @@ export default function Navbar() {
   const menuItems = [
     { label: "Home", href: "/" },
     { label: "List", href: "/list" },
-    { label: "About", href: "/about" }
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" }
   ];
 
   // Don't render until mounted to avoid hydration issues

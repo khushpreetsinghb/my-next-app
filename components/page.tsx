@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "@/components/ReusableComponents/Navbar";
 import {
   Card,
   CardContent,
@@ -48,7 +47,6 @@ export default function ComponentsPage() {
   if (loading) {
     return (
       <main>
-        <MuiNavbar />
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
           <CircularProgress />
         </Box>
@@ -59,7 +57,6 @@ export default function ComponentsPage() {
   if (error) {
     return (
       <main>
-        <MuiNavbar />
         <Box sx={{ p: 4 }}>
           <Alert severity="error">{error}</Alert>
         </Box>
@@ -69,7 +66,6 @@ export default function ComponentsPage() {
 
   return (
     <main>
-      <MuiNavbar />
       <Box sx={{ p: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom textAlign="center" fontWeight="bold">
           Components Showcase
