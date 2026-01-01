@@ -21,6 +21,7 @@ export default function Counter() {
           type="number" 
           value={step} 
           onChange={(e) => setStep(Number(e.target.value))}
+          // min={0}
           className="w-16 px-1 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
       </div>
