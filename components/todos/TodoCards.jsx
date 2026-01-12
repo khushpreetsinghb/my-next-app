@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -39,8 +39,15 @@ export default function TodoCards() {
 
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-  const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
-  const totalPages = Math.ceil(todos.length / todosPerPage);
+  
+  // Memoize pagination calculations to prevent unnecessary recalculations
+  // Without useMemo: Array slicing and Math.ceil would run on every render
+  // With useMemo: Only recalculates when todos, currentPage, or pagination settings change
+  const { currentTodos, totalPages } = useMemo(() => {
+    const current = todos.slice(indexOfFirstTodo, indexOfLastTodo);
+    const pages = Math.ceil(todos.length / todosPerPage);
+    return { currentTodos: current, totalPages: pages };
+  }, [todos, currentPage, todosPerPage, indexOfFirstTodo, indexOfLastTodo]);
 
   if (loading) {
     return (

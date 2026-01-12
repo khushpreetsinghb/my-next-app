@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 export default function TodoList() {
   const [todos, setTodos] = useState([
@@ -14,7 +14,21 @@ export default function TodoList() {
 
   const [newTodo, setNewTodo] = useState("");
 
-  const addTodo = () => {
+
+  // Memoize todo statistics to prevent unnecessary recalculations
+  // Without useMemo: These calculations would run on every render
+  // With useMemo: Only recalculates when todos array changes
+  const { completedCount, totalCount, progressPercentage } = useMemo(() => {
+    const completed = todos.filter(todo => todo.completed).length;
+    const total = todos.length;
+    const percentage = total > 0 ? (completed / total) * 100 : 0;
+    return { completedCount: completed, totalCount: total, progressPercentage: percentage };
+  }, [todos]);
+
+  // Memoize event handlers to prevent unnecessary re-renders of child components
+  // Without useCallback: New function references created on every render
+  // With useCallback: Same function reference returned unless dependencies change
+  const addTodo = useCallback(() => {
     if (newTodo.trim()) {
       const newTodoItem = {
         id: Date.now(),
@@ -24,20 +38,17 @@ export default function TodoList() {
       setTodos([...todos, newTodoItem]);
       setNewTodo("");
     }
-  };
+  }, [newTodo, todos]);
 
-  const toggleTodo = (id) => {
+  const toggleTodo = useCallback((id) => {
     setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     ));
-  };
+  }, [todos]);
 
-  const deleteTodo = (id) => {
+  const deleteTodo = useCallback((id) => {
     setTodos(todos.filter(todo => todo.id !== id));
-  };
-
-  const completedCount = todos.filter(todo => todo.completed).length;
-  const totalCount = todos.length;
+  }, [todos]);
 
   return (
     <div className="border-2 border-amber-500 p-4 rounded-lg mb-8 max-w-md">
@@ -48,7 +59,10 @@ export default function TodoList() {
         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
           <div 
             className="h-full bg-green-500 transition-all duration-300"
-            style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+            // Using memoized progressPercentage instead of recalculating inline
+            // Old way: style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+            // New way: Uses pre-calculated percentage from useMemo
+            style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </div>
