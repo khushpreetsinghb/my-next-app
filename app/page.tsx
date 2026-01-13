@@ -2,6 +2,8 @@ import Count from "@/components/Count";
 import UserCard from "@/components/UserCard";
 import TodoList from "@/components/TodoList";
 import LiftingStateUp from "@/components/LiftingStateUp";
+import UseMemoExample from "@/components/UseMemoExample";
+import UseCallbackExample from "@/components/UseCallbackExample";
 
 export default function Home() {
   return (
@@ -20,6 +22,12 @@ export default function Home() {
           </div>
           <div className="md:col-span-2 lg:col-span-1">
             <LiftingStateUp />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <UseMemoExample />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <UseCallbackExample />
           </div>
         </div>
       </div>

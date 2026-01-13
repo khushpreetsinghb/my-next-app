@@ -1,54 +1,115 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useReducer } from "react";
 
-export default function TodoList() {
-  const [todos, setTodos] = useState([
+// useReducer implementation for TodoList component
+// Why useReducer instead of useState:
+// 1. Multiple related states (todos, newTodo) that change together
+// 2. Complex state logic with multiple actions (add, toggle, delete, update input)
+// 3. Predictable state updates with defined action types
+// 4. Easier to test and maintain state logic in one place
+// 5. Better separation of concerns - state logic separate from UI
+
+// Initial state for todo application
+const initialState = {
+  todos: [
     { id: 1, text: "Learn React basics", completed: true },
     { id: 2, text: "Create components", completed: true },
     { id: 3, text: "Understand state management", completed: false }
-  ]);
+  ],
+  newTodo: ""
+};
+
+// Reducer function - pure function that handles all state updates
+// Takes current state and action, returns new state
+// This makes state changes predictable and centralized
+const todoReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_TODO':
+      // Add new todo if input is not empty
+      if (action.payload.trim()) {
+        return {
+          ...state,
+          todos: [
+            ...state.todos,
+            {
+              id: Date.now(), // Using timestamp as unique ID
+              text: action.payload,
+              completed: false
+            }
+          ],
+          newTodo: "" // Clear input after adding
+        };
+      }
+      return state; // Return unchanged state if input is empty
+    
+    case 'TOGGLE_TODO':
+      // Toggle completion status of a specific todo
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.payload
+            ? { ...todo, completed: !todo.completed }
+            : todo
+        )
+      };
+    
+    case 'DELETE_TODO':
+      // Remove a specific todo from the list
+      return {
+        ...state,
+        todos: state.todos.filter(todo => todo.id !== action.payload)
+      };
+    
+    case 'UPDATE_INPUT':
+      // Update the new todo input field
+      return {
+        ...state,
+        newTodo: action.payload
+      };
+    
+    default:
+      // Return current state for unknown actions
+      return state;
+  }
+};
+
+export default function TodoList() {
+  // useReducer hook replaces multiple useState calls
+  // Returns [currentState, dispatch] - dispatch sends actions to reducer
+  const [state, dispatch] = useReducer(todoReducer, initialState);
+  const { todos, newTodo } = state;
   
   // list of fruits - demonstrating array mapping with keys
   const fruits = ["apple", "banana", "orange", "grape", "strawberry"];
 
-  const [newTodo, setNewTodo] = useState("");
+  // Simple event handlers without useCallback for cleaner code
+  const addTodo = () => {
+    dispatch({ type: 'ADD_TODO', payload: newTodo });
+  };
 
+  const toggleTodo = (id) => {
+    dispatch({ type: 'TOGGLE_TODO', payload: id });
+  };
 
-  // Memoize todo statistics to prevent unnecessary recalculations
-  // Without useMemo: These calculations would run on every render
-  // With useMemo: Only recalculates when todos array changes
-  const { completedCount, totalCount, progressPercentage } = useMemo(() => {
-    const completed = todos.filter(todo => todo.completed).length;
-    const total = todos.length;
-    const percentage = total > 0 ? (completed / total) * 100 : 0;
-    return { completedCount: completed, totalCount: total, progressPercentage: percentage };
-  }, [todos]);
+  const deleteTodo = (id) => {
+    dispatch({ type: 'DELETE_TODO', payload: id });
+  };
 
-  // Memoize event handlers to prevent unnecessary re-renders of child components
-  // Without useCallback: New function references created on every render
-  // With useCallback: Same function reference returned unless dependencies change
-  const addTodo = useCallback(() => {
-    if (newTodo.trim()) {
-      const newTodoItem = {
-        id: Date.now(),
-        text: newTodo,
-        completed: false
-      };
-      setTodos([...todos, newTodoItem]);
-      setNewTodo("");
+  const updateNewTodo = (value) => {
+    dispatch({ type: 'UPDATE_INPUT', payload: value });
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addTodo();
     }
-  }, [newTodo, todos]);
+  };
 
-  const toggleTodo = useCallback((id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
-  }, [todos]);
-
-  const deleteTodo = useCallback((id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  }, [todos]);
+  // Calculate statistics without useMemo for simplicity
+  const completedCount = todos.filter(todo => todo.completed).length;
+  const totalCount = todos.length;
+  const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <div className="border-2 border-amber-500 p-4 rounded-lg mb-8 max-w-md">
@@ -59,9 +120,6 @@ export default function TodoList() {
         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
           <div 
             className="h-full bg-green-500 transition-all duration-300"
-            // Using memoized progressPercentage instead of recalculating inline
-            // Old way: style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
-            // New way: Uses pre-calculated percentage from useMemo
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -71,8 +129,8 @@ export default function TodoList() {
         <input
           type="text"
           value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addTodo()}
+          onChange={(e) => updateNewTodo(e.target.value)}
+          onKeyDown={handleKeyPress}
           placeholder="Add a new todo..."
           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
         />
@@ -114,7 +172,7 @@ export default function TodoList() {
       )}
 
       <p className="mt-4 text-sm text-gray-600">
-        This component demonstrates: lists, keys, array methods, conditional rendering
+        This component demonstrates: lists, keys, array methods, conditional rendering, useReducer pattern
       </p>
       {/* <div className="mt-4">
         <h4 className="font-semibold mb-2">Fruits List:</h4>
