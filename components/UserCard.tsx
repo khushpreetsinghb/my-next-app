@@ -1,8 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
-export default function UserCard({ name, email, role, avatar, isActive = true }) {
+// TypeScript interface for UserCard props
+interface UserCardProps {
+  name: string;
+  email: string;
+  role: string;
+  avatar: string;
+  isActive?: boolean;
+}
+
+// React.memo optimization for UserCard component
+// Without React.memo: Component re-renders whenever parent re-renders, even if props haven't changed
+// With React.memo: Component only re-renders when its props actually change
+// This is especially beneficial for UserCard because:
+// 1. It receives props that don't change frequently (name, email, role, avatar)
+// 2. It has its own internal state (isFollowing) that shouldn't be affected by parent re-renders
+// 3. It performs conditional rendering logic that doesn't need to re-execute unnecessarily
+const UserCard = React.memo(function UserCard({ name, email, role, avatar, isActive = true }: UserCardProps) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   const toggleFollow = () => {
@@ -62,8 +78,10 @@ export default function UserCard({ name, email, role, avatar, isActive = true })
       </button>
 
       <p className="mt-4 text-sm text-gray-600">
-        This component demonstrates: props, conditional rendering, state
+        This component demonstrates: props, conditional rendering, state, React.memo optimization
       </p>
     </div>
   );
-}
+});
+
+export default UserCard;
