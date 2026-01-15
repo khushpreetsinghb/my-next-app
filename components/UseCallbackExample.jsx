@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 
-// Normal child
+// Normal child — re-renders whenever parent re-renders
 const Child = ({ onClick }) => {
   const renders = useRef(0);
   const [mounted, setMounted] = useState(false);
@@ -25,7 +25,7 @@ const Child = ({ onClick }) => {
   );
 };
 
-// Memoized child
+// Memoized child — only re-renders when props change
 const MemoChild = React.memo(({ onClick }) => {
   const renders = useRef(0);
   const [mounted, setMounted] = useState(false);
@@ -49,14 +49,16 @@ const MemoChild = React.memo(({ onClick }) => {
   );
 });
 
-export default function UseCallbackVisual() {
+export default function UseCallbackExample() {
   const [count, setCount] = useState(0);
   const [dummy, setDummy] = useState(0);
 
+  // ❌ New function every render
   const incrementWithoutCallback = () => {
     setCount((c) => c + 1);
   };
 
+  // ✅ Cached function reference
   const incrementWithCallback = useCallback(() => {
     setCount((c) => c + 1);
   }, []);
