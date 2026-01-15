@@ -1,103 +1,47 @@
 "use client";
 
-import { useReducer } from "react";
+import { useState } from "react";
 
-// useReducer implementation for TodoList component
-// Why useReducer instead of useState:
-// 1. Multiple related states (todos, newTodo) that change together
-// 2. Complex state logic with multiple actions (add, toggle, delete, update input)
-// 3. Predictable state updates with defined action types
-// 4. Easier to test and maintain state logic in one place
-// 5. Better separation of concerns - state logic separate from UI
-
-// Initial state for todo application
-const initialState = {
-  todos: [
+export default function TodoList() {
+  const [todos, setTodos] = useState([
     { id: 1, text: "Learn React basics", completed: true },
     { id: 2, text: "Create components", completed: true },
     { id: 3, text: "Understand state management", completed: false }
-  ],
-  newTodo: ""
-};
-
-// Reducer function - pure function that handles all state updates
-// Takes current state and action, returns new state
-// This makes state changes predictable and centralized
-const todoReducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_TODO':
-      // Add new todo if input is not empty
-      if (action.payload.trim()) {
-        return {
-          ...state,
-          todos: [
-            ...state.todos,
-            {
-              id: Date.now(), // Using timestamp as unique ID
-              text: action.payload,
-              completed: false
-            }
-          ],
-          newTodo: "" // Clear input after adding
-        };
-      }
-      return state; // Return unchanged state if input is empty
-    
-    case 'TOGGLE_TODO':
-      // Toggle completion status of a specific todo
-      return {
-        ...state,
-        todos: state.todos.map(todo =>
-          todo.id === action.payload
-            ? { ...todo, completed: !todo.completed }
-            : todo
-        )
-      };
-    
-    case 'DELETE_TODO':
-      // Remove a specific todo from the list
-      return {
-        ...state,
-        todos: state.todos.filter(todo => todo.id !== action.payload)
-      };
-    
-    case 'UPDATE_INPUT':
-      // Update the new todo input field
-      return {
-        ...state,
-        newTodo: action.payload
-      };
-    
-    default:
-      // Return current state for unknown actions
-      return state;
-  }
-};
-
-export default function TodoList() {
-  // useReducer hook replaces multiple useState calls
-  // Returns [currentState, dispatch] - dispatch sends actions to reducer
-  const [state, dispatch] = useReducer(todoReducer, initialState);
-  const { todos, newTodo } = state;
+  ]);
+  const [newTodo, setNewTodo] = useState("");
   
   // list of fruits - demonstrating array mapping with keys
   const fruits = ["apple", "banana", "orange", "grape", "strawberry"];
 
-  // Simple event handlers without useCallback for cleaner code
+  // Simple event handlers using useState
   const addTodo = () => {
-    dispatch({ type: 'ADD_TODO', payload: newTodo });
+    if (newTodo.trim()) {
+      setTodos([
+        ...todos,
+        {
+          id: Date.now(),
+          text: newTodo,
+          completed: false
+        }
+      ]);
+      setNewTodo("");
+    }
   };
 
   const toggleTodo = (id) => {
-    dispatch({ type: 'TOGGLE_TODO', payload: id });
+    setTodos(todos.map(todo =>
+      todo.id === id
+        ? { ...todo, completed: !todo.completed }
+        : todo
+    ));
   };
 
   const deleteTodo = (id) => {
-    dispatch({ type: 'DELETE_TODO', payload: id });
+    setTodos(todos.filter(todo => todo.id !== id));
   };
 
   const updateNewTodo = (value) => {
-    dispatch({ type: 'UPDATE_INPUT', payload: value });
+    setNewTodo(value);
   };
 
   const handleKeyPress = (e) => {
@@ -172,7 +116,7 @@ export default function TodoList() {
       )}
 
       <p className="mt-4 text-sm text-gray-600">
-        This component demonstrates: lists, keys, array methods, conditional rendering, useReducer pattern
+        This component demonstrates: lists, keys, array methods, conditional rendering, useState pattern
       </p>
       {/* <div className="mt-4">
         <h4 className="font-semibold mb-2">Fruits List:</h4>

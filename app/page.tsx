@@ -4,6 +4,7 @@ import TodoList from "@/components/TodoList";
 import LiftingStateUp from "@/components/LiftingStateUp";
 import UseMemoExample from "@/components/UseMemoExample";
 import UseCallbackExample from "@/components/UseCallbackExample";
+import UseReducerExample from "@/components/UseReducerExample";
 
 export default function Home() {
   return (
@@ -28,6 +29,9 @@ export default function Home() {
           </div>
           <div className="md:col-span-2 lg:col-span-1">
             <UseCallbackExample />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <UseReducerExample />
           </div>
         </div>
       </div>
