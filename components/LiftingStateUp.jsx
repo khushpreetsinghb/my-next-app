@@ -9,14 +9,7 @@ import {
   Paper,
 } from "@mui/material";
 
-// React.memo optimization for CelsiusInput child component
-// Without React.memo: Re-renders whenever parent re-renders, even if temperature value hasn't changed
-// With React.memo: Only re-renders when celsius prop or onCelsiusChange callback changes
-// This is beneficial because:
-// 1. It's a simple presentational component that just displays an input
-// 2. It receives props that may not change on every parent render
-// 3. It prevents unnecessary DOM updates and input re-focus issues
-const CelsiusInput = React.memo(function CelsiusInput({ celsius, onCelsiusChange }) {
+function CelsiusInput({ celsius, onCelsiusChange }) {
   return (
     <Box className="mb-4">
       <label className="block mb-2 text-sm font-medium">Celsius</label>
@@ -28,12 +21,9 @@ const CelsiusInput = React.memo(function CelsiusInput({ celsius, onCelsiusChange
       />
     </Box>
   );
-});
+}
 
-// React.memo optimization for FahrenheitInput child component
-// Without React.memo: Re-renders whenever parent re-renders, even if temperature value hasn't changed
-// With React.memo: Only re-renders when fahrenheit prop or onFahrenheitChange callback changes
-const FahrenheitInput = React.memo(function FahrenheitInput({ fahrenheit, onFahrenheitChange }) {
+function FahrenheitInput({ fahrenheit, onFahrenheitChange }) {
   return (
     <Box className="mb-4">
       <label className="block mb-2 text-sm font-medium">Fahrenheit</label>
@@ -45,7 +35,7 @@ const FahrenheitInput = React.memo(function FahrenheitInput({ fahrenheit, onFahr
       />
     </Box>
   );
-});
+}
 
 // Parent Component: Lifts the state up
 // 
