@@ -1,15 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
-// React.memo optimization for Counter component
-// Without React.memo: Component re-renders whenever parent re-renders, even if it has no props
-// With React.memo: Component only re-renders when its props change (none in this case)
-// This is beneficial for Counter because:
-// 1. It has no props - it's a completely self-contained component
-// 2. Parent re-renders (from other components) won't cause unnecessary Counter re-renders
-// 3. It manages its own state that should be isolated from parent render cycles
-const Counter = React.memo(function Counter() {
+function Counter() {
   const [count, setCount] = useState(0);
   const [step, setStep] = useState(1);
 
@@ -40,10 +33,10 @@ const Counter = React.memo(function Counter() {
       </div>
       
       <p className="mt-4 text-sm text-gray-600">
-        This component demonstrates: useState, event handlers, controlled inputs, React.memo optimization
+        This component demonstrates: useState, event handlers, controlled inputs
       </p>
     </div>
   );
-});
+}
 
 export default Counter;
