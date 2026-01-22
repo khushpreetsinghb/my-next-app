@@ -9,7 +9,7 @@ import {
   Pagination,
   Box,
 } from "@mui/material";
-import Loading from "@/components/ReusableComponents/Loading";
+import Loading from "@/components/ui/Loading";
 
 export default function TodoCards() {
   const [todos, setTodos] = useState([]);
