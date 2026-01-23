@@ -4,6 +4,7 @@ import EmotionRegistry from "./emotion-registry";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
+// import HeaderInput from "@/components/examples/HeaderInput";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,6 +36,7 @@ export default function RootLayout({
           <ToastProvider>
             <div className="flex flex-col min-h-screen">
               <Navbar />
+              {/* <HeaderInput /> */}
               <main className="grow">{children}</main>
               <Footer />
             </div>
