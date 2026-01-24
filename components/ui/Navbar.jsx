@@ -43,10 +43,16 @@ export default function Navbar() {
     router.push(href);
     handleMenuClose();
   };
+// useRouter - Best For:
+// Programmatic navigation (after form submission, authentication)
+// Conditional navigation (redirects, logic-based routing)
+// Event handlers (button clicks, dropdowns)
+// Mobile menu navigation with additional logic
 
   const menuItems = [
     { label: "Home", href: "/" },
     { label: "React", href: "/react" },
+    { label: "Blog", href: "/blog" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" }
   ];
