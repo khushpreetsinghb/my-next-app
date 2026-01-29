@@ -43,12 +43,18 @@ export default function Home() {
             </Link>
             <Link 
               href="/isr-demo" 
-              className="inline-block px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors mb-4"
+              className="inline-block px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors mr-4 mb-4"
             >
               🔄 Explore Incremental Static Regeneration (ISR)
             </Link>
+            <Link 
+              href="/tag-revalidation-demo" 
+              className="inline-block px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors mb-4"
+            >
+              🏷️ Explore Tag-Based Revalidation
+            </Link>
             <p className="text-sm text-gray-600 mt-2">
-              Learn how different rendering methods work with practical examples
+              Learn how different rendering methods and caching strategies work with practical examples
             </p>
           </div>
           
