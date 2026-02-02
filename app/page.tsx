@@ -1,6 +1,7 @@
 import ServerComponentExample from "@/components/basics/ServerComponentExample";
 import ErrorTestButton from "@/components/examples/ErrorTestButton";
 import DynamicRoutesExample from "@/components/DynamicRoutesExample";
+import RouteGroupsExample from "@/components/RouteGroupsExample";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -90,6 +91,13 @@ export default function Home() {
                     🚀 See Live Example: /demo/123
                   </Link>
                 </div>
+              </div>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Route Groups</h2>
+                <RouteGroupsExample />
               </div>
             </div>
           </div>
