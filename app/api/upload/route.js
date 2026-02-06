@@ -1,83 +1,54 @@
-import { uploadToCloudinary, extractFileFromFormData, validateFile } from '../../../utils/fileUpload.js';
+import { NextResponse } from 'next/server';
 import cloudinary from '../../../config/cloudinary.js';
+import { uploadToCloudinary, extractFileFromFormData, validateFile } from '../../../utils/fileUpload.js';
 
-// POST /api/upload - Upload file to Cloudinary
+// POST supports either JSON { dataUrl, filename } or FormData (file)
 export async function POST(request) {
   try {
-    // Parse FormData
+    const contentType = request.headers.get('content-type') || '';
+
+    // JSON dataUrl upload
+    if (contentType.includes('application/json')) {
+      const body = await request.json();
+      const { dataUrl, filename } = body;
+      if (!dataUrl) return NextResponse.json({ error: 'No file data provided' }, { status: 400 });
+
+      const result = await cloudinary.uploader.upload(dataUrl, {
+        folder: 'customers',
+        public_id: filename ? filename.replace(/\.[^/.]+$/, '') : undefined,
+        overwrite: true,
+      });
+
+      return NextResponse.json({ success: true, url: result.secure_url, publicId: result.public_id });
+    }
+
+    // FormData upload
     const formData = await request.formData();
-    
-    // Extract folder name (optional, defaults to 'uploads')
-    const folder = formData.get('folder') || 'uploads';
-    
-    // Extract and validate file
     const file = extractFileFromFormData(formData);
     validateFile(file);
 
-    // Upload to Cloudinary
+    const folder = formData.get('folder') || 'customers';
     const result = await uploadToCloudinary(file, folder);
 
-    // Return success response
-    return Response.json({
-      success: true,
-      data: {
-        url: result.secure_url,
-        publicId: result.public_id,
-        format: result.format,
-        size: result.bytes,
-        width: result.width,
-        height: result.height,
-        folder: result.folder
-      },
-      message: 'File uploaded successfully'
-    });
-
+    return NextResponse.json({ success: true, url: result.secure_url, publicId: result.public_id });
   } catch (error) {
     console.error('Upload error:', error);
-    
-    return Response.json({
-      success: false,
-      message: error.message || 'Upload failed'
-    }, { 
-      status: error.message.includes('allowed') || error.message.includes('size') ? 400 : 500 
-    });
+    return NextResponse.json({ success: false, message: error.message || 'Upload failed' }, { status: 500 });
   }
 }
 
-// DELETE /api/upload - Delete file from Cloudinary
+// DELETE /api/upload?publicId=...
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const publicId = searchParams.get('publicId');
-    
-    if (!publicId) {
-      return Response.json({
-        success: false,
-        message: 'Public ID is required'
-      }, { status: 400 });
-    }
+    if (!publicId) return NextResponse.json({ success: false, message: 'Public ID is required' }, { status: 400 });
 
-    // Delete from Cloudinary
     const result = await cloudinary.uploader.destroy(publicId);
-
-    if (result.result === 'ok') {
-      return Response.json({
-        success: true,
-        message: 'File deleted successfully'
-      });
-    } else {
-      return Response.json({
-        success: false,
-        message: 'Failed to delete file'
-      }, { status: 400 });
-    }
-
+    if (result.result === 'ok') return NextResponse.json({ success: true });
+    return NextResponse.json({ success: false, message: 'Failed to delete file' }, { status: 400 });
   } catch (error) {
     console.error('Delete error:', error);
-    
-    return Response.json({
-      success: false,
-      message: 'Delete operation failed'
-    }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'Delete operation failed' }, { status: 500 });
   }
 }
