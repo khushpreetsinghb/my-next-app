@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import ImageModal from '@/components/ui/ImageModal';
 
 export default function TestDBPage() {
   const [customers, setCustomers] = useState([]);
@@ -16,6 +17,7 @@ export default function TestDBPage() {
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState(null);
   const [fileError, setFileError] = useState('');
+  const fileInputRef = useRef(null);
 
   const fetchCustomers = async () => {
     try {
@@ -101,6 +103,16 @@ export default function TestDBPage() {
     setFileName(file.name);
   };
 
+  const handleRemoveImage = () => {
+    setFileDataUrl(null);
+    setFileName(null);
+    setFileError('');
+    // Clear the file input value to allow re-uploading the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this customer?')) return;
     
@@ -165,33 +177,78 @@ export default function TestDBPage() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Profile Image</label>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Profile Image</label>
 
-            <div className="flex items-center gap-3">
-              <label className={`inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 cursor-pointer hover:bg-gray-50 ${uploading ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                Choose file
-                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={uploading} />
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                id="profileImage"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                disabled={uploading}
+                tabIndex="0"
+              />
+              <label
+                htmlFor="profileImage"
+                className={`inline-flex items-center px-2 py-1 bg-gray-400 text-white rounded-md cursor-pointer hover:bg-gray-500 transition-colors duration-200 ${uploading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                tabIndex="0"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  />
+                </svg>
+                Choose File
               </label>
 
               <div className="text-sm text-gray-600">
-                {fileName ? (
-                  <span className="inline-flex items-center gap-2">
-                    <span className="font-medium text-gray-800">{fileName}</span>
-                    <button type="button" onClick={() => { setFileDataUrl(null); setFileName(null); setFileError(''); }} className="text-xs text-red-500 hover:underline">Remove</button>
-                  </span>
-                ) : (
-                  <span>No file chosen</span>
-                )}
+                {!fileName && <span>No file chosen</span>}
               </div>
             </div>
 
             {fileError && <p className="text-sm text-red-500 mt-2">{fileError}</p>}
 
             {fileDataUrl && (
-              <div className="mt-3">
-                <a href={fileDataUrl} target="_blank" rel="noopener noreferrer">
-                  <img src={fileDataUrl} alt="preview" className="w-28 h-28 object-cover rounded-md border" />
-                </a>
+              <div className="mt-3 relative inline-block group">
+                <ImageModal
+                  imageUrl={fileDataUrl}
+                  altText={fileName || 'preview'}
+                  triggerElement={
+                    <img src={fileDataUrl} alt="preview" className="w-20 h-20 object-cover rounded-md border" />
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md text-gray-600 hover:text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  aria-label="Remove image"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             )}
 
@@ -217,9 +274,13 @@ export default function TestDBPage() {
               <div className="flex justify-between items-start">
                 <div className="flex gap-4">
                   {customer.profileImage ? (
-                    <a href={customer.profileImage} target="_blank" rel="noopener noreferrer">
-                      <img src={customer.profileImage} alt={`${customer.name} avatar`} className="w-16 h-16 object-cover rounded-md border" />
-                    </a>
+                    <ImageModal
+                      imageUrl={customer.profileImage}
+                      altText={`${customer.name} avatar`}
+                      triggerElement={
+                        <img src={customer.profileImage} alt={`${customer.name} avatar`} className="w-16 h-16 object-cover rounded-md border" />
+                      }
+                    />
                   ) : (
                     <div className="w-16 h-16 bg-gray-100 rounded-md border flex items-center justify-center text-gray-400">No Image</div>
                   )}
