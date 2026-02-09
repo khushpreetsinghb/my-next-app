@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toast } from 'react-toastify';
+import ImageModal from './ui/ImageModal';
 
 export default function FileUploadDemo() {
   const [uploading, setUploading] = useState(false);
@@ -165,11 +166,21 @@ export default function FileUploadDemo() {
               <div key={file.publicId} className="p-2 border rounded hover:bg-gray-50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <div className="font-semibold text-sm truncate">{file.originalName}</div>
+                  <div className="font-semibold text-sm truncate">{file.originalName}</div>
                     <div className="text-xs text-gray-600">
                       {file.format.toUpperCase()} • {(file.size / 1024).toFixed(1)}KB
                     </div>
-                    {file.url && (
+                    {file.url && file.format && ['jpeg', 'png', 'webp', 'jpg', 'gif'].includes(file.format.toLowerCase()) ? (
+                      <ImageModal
+                        imageUrl={file.url}
+                        altText={file.originalName}
+                        triggerElement={
+                          <span className="text-xs text-blue-600 hover:underline cursor-pointer">
+                            View Image
+                          </span>
+                        }
+                      />
+                    ) : file.url ? (
                       <a 
                         href={file.url} 
                         target="_blank" 
@@ -178,7 +189,7 @@ export default function FileUploadDemo() {
                       >
                         View File
                       </a>
-                    )}
+                    ) : null}
                   </div>
                   
                   <button
