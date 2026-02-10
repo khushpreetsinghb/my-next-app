@@ -3,7 +3,7 @@ import fs from 'fs';
 import mysql from 'mysql2/promise';
 
 // Load .env based on NODE_ENV like other config files
-const envFile = process.env.NODE_ENV === 'development' ? '.env.development' : '.env';
+const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.development';
 dotenv.config({ path: envFile });
 
 const poolOptions = {
@@ -20,9 +20,13 @@ const poolOptions = {
 // Attach SSL CA if path provided
 if (process.env.TIDB_CA_PATH) {
   try {
-    poolOptions.ssl = { ca: fs.readFileSync(process.env.TIDB_CA_PATH) };
+    const caCert = fs.readFileSync(process.env.TIDB_CA_PATH);
+    poolOptions.ssl = { 
+      ca: caCert,
+      rejectUnauthorized: true
+    };
   } catch (err) {
-    console.warn('Could not read TIDB_CA_PATH for mysql ssl:', err.message || err);
+    console.warn('❌ Could not read TIDB_CA_PATH for mysql ssl:', err.message || err);
   }
 }
 
@@ -36,7 +40,7 @@ const initDB = async () => {
     email VARCHAR(255) NOT NULL UNIQUE,
     age INT NULL,
     isActive TINYINT(1) DEFAULT 1,
-    profileImage VARCHAR(512) NULL,
+    profileImage VARCHAR(255) NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB;`;
@@ -49,7 +53,28 @@ const initDB = async () => {
   }
 };
 
-// Run initialization (best-effort)
+// Run initialization
 initDB();
 
 export default pool;
+
+// Environment-based loading: Uses .env.development for development, .env for production
+// Sequelize setup: Configured for TiDB MySQL with SSL support
+// Connection testing: Automatically tests database connection on startup
+// Development logging: Enables SQL logging in development mode
+
+// Quick summary: I searched the repo — db.js is imported in Customer.js (used to define the Sequelize Customer model). It's also the file that creates/initializes the sequelize instance.
+
+// Options
+
+// Keep db.js: no action required (Sequelize remains for Customer model).
+// Remove db.js: I must convert Customer.js to use mysql.js (plain mysql2 queries) and update any code that expects a Sequelize model. I can do this and then remove db.js and the sequelize dependency.
+// Recommendation
+
+// If you want to remove Sequelize entirely, I can convert Customer.js into a small data-access module (using mysql.js) and then delete db.js. I recommend this for consistency since CRUD now uses mysql2 directly.
+// Which would you like me to do?
+
+// Keep db.js (do nothing), or
+// Convert Customer.js to mysql2 and remove db.js + Sequelize?
+// GPT-5 mini • 1x
+// Claude Haiku 4.5 • 1x

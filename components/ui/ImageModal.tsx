@@ -29,7 +29,7 @@ export default function ImageModal({ imageUrl, altText, triggerElement }: ImageM
       {/* Modal Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60">
-          <div className="relative w-full max-w-4xl rounded-lg bg-white p-4 shadow-xl">
+          <div className="relative w-full max-w-4xl rounded-lg bg-white px-2 py-1 shadow-xl">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-lg font-bold">Image Preview</h2>
               <button
@@ -59,7 +59,7 @@ export default function ImageModal({ imageUrl, altText, triggerElement }: ImageM
               <img
                 src={imageUrl}
                 alt={altText}
-                className="h-[75vh] object-contain"
+                className="h-[65vh] object-contain"
               />
             </div>
           </div>

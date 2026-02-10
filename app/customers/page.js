@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import ImageModal from '@/components/ui/ImageModal';
+import { toast } from 'react-toastify';
 
 export default function TestDBPage() {
   const [customers, setCustomers] = useState([]);
@@ -18,6 +19,7 @@ export default function TestDBPage() {
   const [fileName, setFileName] = useState(null);
   const [fileError, setFileError] = useState('');
   const fileInputRef = useRef(null);
+  const [editingCustomer, setEditingCustomer] = useState(null);
 
   const fetchCustomers = async () => {
     try {
@@ -53,8 +55,18 @@ export default function TestDBPage() {
       }
 
       const payload = { ...formData, profileImage: profileUrl };
-      const response = await fetch('/api/customers', {
-        method: 'POST',
+      
+      // Determine if it's create or update
+      const isUpdate = editingCustomer !== null;
+      const url = isUpdate ? `/api/customers` : '/api/customers';
+      const method = isUpdate ? 'PUT' : 'POST';
+      
+      if (isUpdate) {
+        payload.id = editingCustomer;
+      }
+      
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -62,13 +74,21 @@ export default function TestDBPage() {
       });
       
       if (response.ok) {
-        alert('Customer created successfully!');
+        toast.success(isUpdate ? 'Customer updated successfully!' : 'Customer created successfully!');
         setFormData({ name: '', email: '', age: '', isActive: true, profileImage: '' });
         setFileDataUrl(null);
+        setFileName(null);
+        setFileError('');
+        setEditingCustomer(null);
+        // Clear file input value
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         fetchCustomers(); // Refresh the list
       }
     } catch (error) {
-      console.error('Error creating customer:', error);
+      console.error('Error creating/updating customer:', error);
+      toast.error('Failed to save customer');
     }
   };
 
@@ -122,12 +142,43 @@ export default function TestDBPage() {
       });
       
       if (response.ok) {
-        alert('Customer deleted successfully!');
+        toast.success('Customer deleted successfully!');
         fetchCustomers(); // Refresh the list
       }
     } catch (error) {
       console.error('Error deleting customer:', error);
+      toast.error('Failed to delete customer');
     }
+  };
+
+  const handleEdit = (customer) => {
+    setFormData({
+      name: customer.name,
+      email: customer.email,
+      age: customer.age || '',
+      isActive: customer.isActive,
+      profileImage: customer.profileImage || '',
+    });
+    setEditingCustomer(customer.id);
+    // Set existing image for display if it exists
+    if (customer.profileImage) {
+      setFileDataUrl(customer.profileImage);
+      setFileName('existing-image.jpg'); // Set a placeholder filename
+    } else {
+      setFileDataUrl(null);
+      setFileName(null);
+    }
+    setFileError('');
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setFormData({ name: '', email: '', age: '', isActive: true, profileImage: '' });
+    setEditingCustomer(null);
+    setFileDataUrl(null);
+    setFileName(null);
+    setFileError('');
   };
 
   if (loading) {
@@ -140,7 +191,9 @@ export default function TestDBPage() {
       
       {/* Create User Form */}
       <div className="mb-8 p-6 border rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Create New Customer</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          {editingCustomer ? 'Edit Customer' : 'Create New Customer'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -213,7 +266,11 @@ export default function TestDBPage() {
               </label>
 
               <div className="text-sm text-gray-600">
-                {!fileName && <span>No file chosen</span>}
+                {!fileName ? (
+                  <span>No file chosen</span>
+                ) : (
+                  <span>{fileName}</span>
+                )}
               </div>
             </div>
 
@@ -260,8 +317,17 @@ export default function TestDBPage() {
             disabled={uploading || !!fileError}
             className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${uploading || fileError ? 'opacity-60 cursor-not-allowed hover:bg-blue-500' : ''}`}
           >
-            {uploading ? 'Uploading…' : 'Create Customer'}
+            {uploading ? 'Uploading…' : (editingCustomer ? 'Update Customer' : 'Create Customer')}
           </button>
+          {editingCustomer && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="ml-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
         </form>
       </div>
 
@@ -292,12 +358,20 @@ export default function TestDBPage() {
                     <p className="text-xs text-gray-400">Created: {new Date(customer.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(customer.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(customer)}
+                    className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(customer.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
