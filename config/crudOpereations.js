@@ -1,3 +1,4 @@
+// This contains the actual database logic
 import pool from './mysql.js';
 
 // Helper to map result rows (mysql2 returns plain objects already)
@@ -41,16 +42,6 @@ export const getCustomerById = async (id) => {
   }
 };
 
-export const getCustomerByEmail = async (email) => {
-  try {
-    const [rows] = await pool.execute('SELECT * FROM Customer WHERE email = ? LIMIT 1', [email]);
-    return rows[0] || null;
-  } catch (error) {
-    console.error('Error fetching customer by email:', error);
-    throw error;
-  }
-};
-
 // UPDATE operations
 export const updateCustomer = async (id, updateData) => {
   try {
@@ -85,27 +76,6 @@ export const deleteCustomer = async (id) => {
     return false;
   } catch (error) {
     console.error('Error deleting customer:', error);
-    throw error;
-  }
-};
-
-// Bulk operations
-export const createMultipleCustomers = async (customersArray) => {
-  try {
-    if (!Array.isArray(customersArray) || customersArray.length === 0) return [];
-    const values = [];
-    const placeholders = customersArray.map((c) => {
-      values.push(c.name, c.email, c.age ?? null, c.isActive ? 1 : 0, c.profileImage ?? null);
-      return '(?, ?, ?, ?, ?)';
-    }).join(', ');
-
-    await pool.execute(`INSERT INTO Customer (name, email, age, isActive, profileImage) VALUES ${placeholders}`, values);
-    // Return all inserted rows by matching emails (best-effort)
-    const emails = customersArray.map(c => c.email);
-    const [rows] = await pool.query(`SELECT * FROM Customer WHERE email IN (${emails.map(()=>'?').join(',')})`, emails);
-    return rows;
-  } catch (error) {
-    console.error('Error creating multiple customers:', error);
     throw error;
   }
 };

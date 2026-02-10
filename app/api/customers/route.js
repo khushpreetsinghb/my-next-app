@@ -1,3 +1,4 @@
+// This is the API route that handles HTTP requests from the UI
 import { NextResponse } from 'next/server';
 import {
   createCustomer,
