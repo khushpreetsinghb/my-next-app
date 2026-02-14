@@ -79,32 +79,3 @@ export const deleteCustomer = async (id) => {
     throw error;
   }
 };
-
-// Query operations with filters
-export const getCustomersWithFilters = async (filters = {}) => {
-  try {
-    const whereParts = [];
-    const values = [];
-    Object.entries(filters).forEach(([k, v]) => {
-      if (k === 'isActive') {
-        whereParts.push(`${k} = ?`);
-        values.push(v ? 1 : 0);
-      } else {
-        whereParts.push(`${k} = ?`);
-        values.push(v);
-      }
-    });
-
-    const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
-    const [rows] = await pool.execute(`SELECT * FROM Customer ${whereClause} ORDER BY createdAt DESC`, values);
-    return rows;
-  } catch (error) {
-    console.error('Error fetching customers with filters:', error);
-    throw error;
-  }
-};
-
-// Example: Get active customers
-export const getActiveCustomers = async () => {
-  return await getCustomersWithFilters({ isActive: true });
-};
