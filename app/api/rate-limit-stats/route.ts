@@ -5,7 +5,7 @@ import { rateLimitStats } from '../../../middleware/rateLimit'
 export async function GET(request: NextRequest) {
   // Use the rate limit stats middleware to get current stats
   const statsResponse = await rateLimitStats(request, {} as any)
-  
+
   if (statsResponse && statsResponse !== NextResponse.next()) {
     return statsResponse
   }

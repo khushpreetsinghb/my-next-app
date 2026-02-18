@@ -21,7 +21,7 @@ const poolOptions = {
 if (process.env.TIDB_CA_PATH) {
   try {
     const caCert = fs.readFileSync(process.env.TIDB_CA_PATH);
-    poolOptions.ssl = { 
+    poolOptions.ssl = {
       ca: caCert,
       rejectUnauthorized: true
     };

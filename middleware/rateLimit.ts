@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { NextFetchEvent, NextMiddleware } from 'next/server'
+import type { NextFetchEvent } from 'next/server'
+
+// Define middleware type to avoid deprecation warning
+type MiddlewareFunction = (
+  request: NextRequest,
+  event: NextFetchEvent
+) => Promise<NextResponse | void | undefined>
 
 // Rate limiting configuration
 interface RateLimitConfig {
@@ -18,17 +24,17 @@ const rateLimitStore = new Map<string, {
 }>()
 
 // Basic rate limiting middleware
-export const rateLimitMiddleware = (config: RateLimitConfig): NextMiddleware => {
+export const rateLimitMiddleware = (config: RateLimitConfig): MiddlewareFunction => {
   return async (request: NextRequest, event: NextFetchEvent) => {
     const key = getRateLimitKey(request)
     const now = Date.now()
-    
+
     // Clean up expired entries
     cleanupExpiredEntries(now)
-    
+
     // Get current rate limit data
     const current = rateLimitStore.get(key)
-    
+
     if (current && now < current.resetTime) {
       // Window is still active
       if (current.count >= config.maxRequests) {
@@ -43,16 +49,16 @@ export const rateLimitMiddleware = (config: RateLimitConfig): NextMiddleware => 
           },
           { status: 429 }
         )
-        
+
         // Add rate limit headers
         response.headers.set('X-RateLimit-Limit', config.maxRequests.toString())
         response.headers.set('X-RateLimit-Remaining', '0')
         response.headers.set('X-RateLimit-Reset', current.resetTime.toString())
         response.headers.set('Retry-After', Math.ceil((current.resetTime - now) / 1000).toString())
-        
+
         return response
       }
-      
+
       // Increment counter
       current.count++
       current.lastRequest = now
@@ -64,16 +70,16 @@ export const rateLimitMiddleware = (config: RateLimitConfig): NextMiddleware => 
         lastRequest: now
       })
     }
-    
+
     // Add rate limit headers to response
     const response = NextResponse.next()
     const updated = rateLimitStore.get(key)!
     const remaining = Math.max(0, config.maxRequests - updated.count)
-    
+
     response.headers.set('X-RateLimit-Limit', config.maxRequests.toString())
     response.headers.set('X-RateLimit-Remaining', remaining.toString())
     response.headers.set('X-RateLimit-Reset', updated.resetTime.toString())
-    
+
     return response
   }
 }
@@ -121,24 +127,24 @@ export const passwordResetRateLimit = rateLimitMiddleware({
 })
 
 // Progressive rate limiting (gets stricter with repeated violations)
-export const progressiveRateLimit: NextMiddleware = async (request: NextRequest, event: NextFetchEvent) => {
+export const progressiveRateLimit: MiddlewareFunction = async (request: NextRequest, event: NextFetchEvent) => {
   const key = `progressive:${getRateLimitKey(request)}`
   const now = Date.now()
-  
+
   cleanupExpiredEntries(now)
-  
+
   const current = rateLimitStore.get(key)
-  
+
   if (current && now < current.resetTime) {
     const violations = current.count
     const baseLimit = 100
     const baseWindow = 60 * 1000
-    
+
     // Make it stricter with each violation
     const multiplier = Math.pow(2, violations - 1)
     const maxRequests = Math.max(1, Math.floor(baseLimit / multiplier))
     const windowMs = baseWindow * multiplier
-    
+
     if (current.count >= maxRequests) {
       return NextResponse.json(
         {
@@ -150,7 +156,7 @@ export const progressiveRateLimit: NextMiddleware = async (request: NextRequest,
         { status: 429 }
       )
     }
-    
+
     current.count++
   } else {
     rateLimitStore.set(key, {
@@ -159,59 +165,59 @@ export const progressiveRateLimit: NextMiddleware = async (request: NextRequest,
       lastRequest: now
     })
   }
-  
+
   return NextResponse.next()
 }
 
 // Rate limiting by endpoint
-export const createEndpointRateLimit = (endpointLimits: Record<string, RateLimitConfig>): NextMiddleware => {
+export const createEndpointRateLimit = (endpointLimits: Record<string, RateLimitConfig>): MiddlewareFunction => {
   return async (request: NextRequest, event: NextFetchEvent) => {
     const { pathname } = request.nextUrl
-    
+
     // Find matching endpoint configuration
-    const matchingEndpoint = Object.keys(endpointLimits).find(endpoint => 
+    const matchingEndpoint = Object.keys(endpointLimits).find(endpoint =>
       pathname.startsWith(endpoint)
     )
-    
+
     if (!matchingEndpoint) {
       return NextResponse.next()
     }
-    
+
     const config = endpointLimits[matchingEndpoint]
     const middleware = rateLimitMiddleware(config)
-    
+
     return middleware(request, event)
   }
 }
 
 // Rate limiting with different tiers
-export const tieredRateLimit: NextMiddleware = async (request: NextRequest, event: NextFetchEvent) => {
+export const tieredRateLimit: MiddlewareFunction = async (request: NextRequest, event: NextFetchEvent) => {
   const userTier = request.headers.get('x-user-tier') || 'free'
   const key = `tier:${userTier}:${getRateLimitKey(request)}`
-  
+
   const tierConfigs = {
     free: { windowMs: 60 * 1000, maxRequests: 30 },
     basic: { windowMs: 60 * 1000, maxRequests: 100 },
     premium: { windowMs: 60 * 1000, maxRequests: 500 },
     enterprise: { windowMs: 60 * 1000, maxRequests: 2000 }
   }
-  
+
   const config = tierConfigs[userTier as keyof typeof tierConfigs] || tierConfigs.free
   const middleware = rateLimitMiddleware(config)
-  
+
   return middleware(request, event)
 }
 
 // Helper functions
 export function getRateLimitKey(request: NextRequest): string {
   // Try to get user ID first (for authenticated users)
-  const userId = request.headers.get('x-user-id') || 
-                 request.cookies.get('user-id')?.value
-  
+  const userId = request.headers.get('x-user-id') ||
+    request.cookies.get('user-id')?.value
+
   if (userId) {
     return `user:${userId}`
   }
-  
+
   // Fall back to IP address
   const ip = getClientIP(request)
   return `ip:${ip}`
@@ -221,12 +227,12 @@ export function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
   const cfConnectingIP = request.headers.get('cf-connecting-ip')
-  
-  const ip = forwarded?.split(',')[0] || 
-             realIP || 
-             cfConnectingIP || 
-             '127.0.0.1'
-  
+
+  const ip = forwarded?.split(',')[0] ||
+    realIP ||
+    cfConnectingIP ||
+    '127.0.0.1'
+
   return ip.trim()
 }
 
@@ -239,14 +245,14 @@ function cleanupExpiredEntries(now: number): void {
 }
 
 // Rate limiting statistics middleware
-export const rateLimitStats: NextMiddleware = async (request: NextRequest, event: NextFetchEvent) => {
+export const rateLimitStats: MiddlewareFunction = async (request: NextRequest, event: NextFetchEvent) => {
   const { pathname } = request.nextUrl
-  
+
   // Only show stats for specific route
   if (pathname !== '/api/rate-limit-stats') {
     return NextResponse.next()
   }
-  
+
   const stats = {
     totalEntries: rateLimitStore.size,
     entries: Array.from(rateLimitStore.entries()).map(([key, data]) => ({
@@ -256,6 +262,6 @@ export const rateLimitStats: NextMiddleware = async (request: NextRequest, event
       timeRemaining: Math.max(0, data.resetTime - Date.now())
     }))
   }
-  
+
   return NextResponse.json(stats)
 }

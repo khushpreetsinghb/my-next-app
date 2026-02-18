@@ -1,32 +1,32 @@
 // Middleware exports for easy importing
 import { NextResponse } from 'next/server'
 
-export { 
-  authMiddleware, 
-  rbacMiddleware, 
-  adminMiddleware, 
-  moderatorMiddleware 
+export {
+  authMiddleware,
+  rbacMiddleware,
+  adminMiddleware,
+  moderatorMiddleware
 } from './auth'
 
-export { 
-  loggingMiddleware, 
-  responseLoggingMiddleware, 
-  errorLoggingMiddleware, 
+export {
+  loggingMiddleware,
+  responseLoggingMiddleware,
+  errorLoggingMiddleware,
   apiLoggingMiddleware,
-  performanceMiddleware 
+  performanceMiddleware
 } from './logging'
 
-export { 
-  corsMiddleware, 
-  corsResponseMiddleware, 
-  strictCorsMiddleware, 
+export {
+  corsMiddleware,
+  corsResponseMiddleware,
+  strictCorsMiddleware,
   devCorsMiddleware,
   validateOriginMiddleware,
   routeSpecificCors,
-  createCorsMiddleware 
+  createCorsMiddleware
 } from './cors'
 
-export { 
+export {
   rateLimitMiddleware,
   ipRateLimit,
   userRateLimit,
@@ -56,20 +56,24 @@ export { getClientIP } from './logging'
 export { getClientIP as getClientIPFromRateLimit } from './rateLimit'
 export { getClientIP as getClientIPFromSecurity } from './security'
 
-// Middleware chain helper
-import type { NextMiddleware } from 'next/server'
+// Define middleware type to avoid deprecation warning
+type MiddlewareFunction = (
+  request: any,
+  event: any
+) => Promise<any | void | undefined>
 
-export function createMiddlewareChain(middlewares: NextMiddleware[]): NextMiddleware {
+// Middleware chain helper
+export function createMiddlewareChain(middlewares: MiddlewareFunction[]): MiddlewareFunction {
   return async (request, event) => {
     for (const middleware of middlewares) {
       const result = await middleware(request, event)
-      
+
       // If middleware returns a response, stop the chain
       if (result && result !== NextResponse.next()) {
         return result
       }
     }
-    
+
     return NextResponse.next()
   }
 }
@@ -77,13 +81,13 @@ export function createMiddlewareChain(middlewares: NextMiddleware[]): NextMiddle
 // Conditional middleware helper
 export function createConditionalMiddleware(
   condition: (request: Request) => boolean,
-  middleware: NextMiddleware
-): NextMiddleware {
+  middleware: MiddlewareFunction
+): MiddlewareFunction {
   return async (request, event) => {
     if (condition(request)) {
       return middleware(request, event)
     }
-    
+
     return NextResponse.next()
   }
 }
@@ -91,14 +95,14 @@ export function createConditionalMiddleware(
 // Path-based middleware helper
 export function createPathMiddleware(
   paths: string[],
-  middleware: NextMiddleware,
+  middleware: MiddlewareFunction,
   exact: boolean = false
-): NextMiddleware {
+): MiddlewareFunction {
   return createConditionalMiddleware(
     (request) => {
       const url = new URL(request.url)
       const pathname = url.pathname
-      
+
       if (exact) {
         return paths.includes(pathname)
       } else {
@@ -112,8 +116,8 @@ export function createPathMiddleware(
 // Method-based middleware helper
 export function createMethodMiddleware(
   methods: string[],
-  middleware: NextMiddleware
-): NextMiddleware {
+  middleware: MiddlewareFunction
+): MiddlewareFunction {
   return createConditionalMiddleware(
     (request) => methods.includes(request.method),
     middleware
@@ -123,8 +127,8 @@ export function createMethodMiddleware(
 // Environment-based middleware helper
 export function createEnvironmentMiddleware(
   environments: string[],
-  middleware: NextMiddleware
-): NextMiddleware {
+  middleware: MiddlewareFunction
+): MiddlewareFunction {
   return createConditionalMiddleware(
     () => environments.includes(process.env.NODE_ENV || 'development'),
     middleware

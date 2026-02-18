@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
   // Get request information to show middleware effects
   const headers = Object.fromEntries(request.headers.entries())
   const userAgent = request.headers.get('user-agent')
-  const ip = request.headers.get('x-forwarded-for') || 
-             request.headers.get('x-real-ip') || 
-             'unknown'
-  
+  const ip = request.headers.get('x-forwarded-for') ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+
   // Check if authentication middleware added user info
   const userId = request.headers.get('x-user-id')
   const userRole = request.headers.get('x-user-role')
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     return NextResponse.json({
       message: 'POST request processed',
       receivedData: body,

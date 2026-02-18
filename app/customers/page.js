@@ -55,16 +55,16 @@ export default function TestDBPage() {
       }
 
       const payload = { ...formData, profileImage: profileUrl };
-      
+
       // Determine if it's create or update
       const isUpdate = editingCustomer !== null;
       const url = isUpdate ? `/api/customers` : '/api/customers';
       const method = isUpdate ? 'PUT' : 'POST';
-      
+
       if (isUpdate) {
         payload.id = editingCustomer;
       }
-      
+
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -72,7 +72,7 @@ export default function TestDBPage() {
         },
         body: JSON.stringify(payload),
       });
-      
+
       if (response.ok) {
         toast.success(isUpdate ? 'Customer updated successfully!' : 'Customer created successfully!');
         setFormData({ name: '', email: '', age: '', isActive: true, profileImage: '' });
@@ -135,12 +135,12 @@ export default function TestDBPage() {
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this customer?')) return;
-    
+
     try {
       const response = await fetch(`/api/customers?id=${id}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         toast.success('Customer deleted successfully!');
         fetchCustomers(); // Refresh the list
@@ -188,7 +188,7 @@ export default function TestDBPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Database CRUD Test</h1>
-      
+
       {/* Create User Form */}
       <div className="mb-8 p-6 border rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">
@@ -199,7 +199,7 @@ export default function TestDBPage() {
             type="text"
             placeholder="Name"
             value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
@@ -207,7 +207,7 @@ export default function TestDBPage() {
             type="email"
             placeholder="Email"
             value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
@@ -215,7 +215,7 @@ export default function TestDBPage() {
             type="number"
             placeholder="Age"
             value={formData.age}
-            onChange={(e) => setFormData({...formData, age: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
             className="w-full p-2 border rounded"
           />
           <div className="flex items-center gap-3">
@@ -223,7 +223,7 @@ export default function TestDBPage() {
               <input
                 type="checkbox"
                 checked={formData.isActive}
-                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               />
               <span>Active</span>
             </label>
