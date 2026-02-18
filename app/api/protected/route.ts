@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   // This route should be protected by auth middleware
   // If you reach here, authentication passed
-  
+
   const userId = request.headers.get('x-user-id')
   const userRole = request.headers.get('x-user-role')
 

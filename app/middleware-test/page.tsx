@@ -1,12 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function MiddlewareTestPage() {
   const [testResults, setTestResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const addResult = (test: string, status: 'success' | 'error' | 'info', message: string, data?: any) => {
     setTestResults(prev => [...prev, { test, status, message, data, timestamp: new Date().toLocaleTimeString() }])
@@ -43,7 +41,7 @@ export default function MiddlewareTestPage() {
 
   const testRateLimit = async () => {
     try {
-      const promises = Array.from({ length: 5 }, () => 
+      const promises = Array.from({ length: 5 }, () =>
         fetch('/api/middleware-demo').then(r => r.json())
       )
       const results = await Promise.all(promises)
@@ -88,21 +86,21 @@ export default function MiddlewareTestPage() {
   const runAllTests = async () => {
     setLoading(true)
     clearResults()
-    
+
     await testLogging()
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     await testAuthentication()
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     await testRateLimit()
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     await testCORS()
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     await testAdminAccess()
-    
+
     setLoading(false)
   }
 
@@ -122,7 +120,7 @@ export default function MiddlewareTestPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="text-blue-800 font-semibold mb-2">📝 Console Logs</h3>
           <p className="text-blue-700 text-sm">
-            The detailed logs you see in the console are from our <strong>logging middleware</strong>. 
+            The detailed logs you see in the console are from our <strong>logging middleware</strong>.
             They show: timestamp, method, URL, IP address, user-agent, and headers for each request.
           </p>
         </div>
@@ -192,27 +190,24 @@ export default function MiddlewareTestPage() {
               {testResults.map((result, index) => (
                 <div
                   key={index}
-                  className={`p-4 rounded-lg border ${
-                    result.status === 'success' ? 'bg-green-50 border-green-200' :
-                    result.status === 'error' ? 'bg-red-50 border-red-200' :
-                    'bg-blue-50 border-blue-200'
-                  }`}
+                  className={`p-4 rounded-lg border ${result.status === 'success' ? 'bg-green-50 border-green-200' :
+                      result.status === 'error' ? 'bg-red-50 border-red-200' :
+                        'bg-blue-50 border-blue-200'
+                    }`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-semibold ${
-                      result.status === 'success' ? 'text-green-800' :
-                      result.status === 'error' ? 'text-red-800' :
-                      'text-blue-800'
-                    }`}>
+                    <h3 className={`font-semibold ${result.status === 'success' ? 'text-green-800' :
+                        result.status === 'error' ? 'text-red-800' :
+                          'text-blue-800'
+                      }`}>
                       {result.test}
                     </h3>
                     <span className="text-sm text-gray-500">{result.timestamp}</span>
                   </div>
-                  <p className={`text-sm mb-2 ${
-                    result.status === 'success' ? 'text-green-700' :
-                    result.status === 'error' ? 'text-red-700' :
-                    'text-blue-700'
-                  }`}>
+                  <p className={`text-sm mb-2 ${result.status === 'success' ? 'text-green-700' :
+                      result.status === 'error' ? 'text-red-700' :
+                        'text-blue-700'
+                    }`}>
                     {result.message}
                   </p>
                   {result.data && (
