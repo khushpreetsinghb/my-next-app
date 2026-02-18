@@ -4,6 +4,8 @@ import DynamicRoutesExample from "@/components/DynamicRoutesExample";
 import RouteGroupsExample from "@/components/RouteGroupsExample";
 import RouteHandlersDemo from "@/components/RouteHandlersDemo";
 import FileUploadDemo from "@/components/FileUploadDemo";
+import AuthenticationExplanation from "@/components/AuthenticationExplanation";
+import ImageOptimizationDemo from "@/components/ImageOptimizationDemo";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -116,6 +118,38 @@ export default function Home() {
                 <FileUploadDemo />
               </div>
             </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">🔧 Middleware Testing</h2>
+                <p className="text-gray-600 mb-4">Test and observe middleware behavior including auth, CORS, rate limiting, and logging.</p>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <span className="mr-2">✅</span> Authentication testing
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <span className="mr-2">✅</span> CORS handling
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <span className="mr-2">✅</span> Rate limiting
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <span className="mr-2">✅</span> Request logging
+                  </div>
+                </div>
+                <div className="mt-4 text-center">
+                  <Link
+                    href="/middleware-test"
+                    className="inline-block px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                  >
+                    🚀 Test Middleware
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <AuthenticationExplanation />
+            <ImageOptimizationDemo />
           </div>
         </div>
       </div>
