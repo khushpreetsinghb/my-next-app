@@ -23,7 +23,10 @@ export default function TestDBPage() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers');
+  // BACKEND_INTEGRATION_NOTE: This fetch will be replaced with Express backend API call
+  // const response = await fetch('/api/customers');
+  // TODO: Replace with: const response = await fetch('http://localhost:3001/api/customers');
+  const response = await fetch('/api/customers');
       const data = await response.json();
       setCustomers(data);
     } catch (error) {
@@ -44,6 +47,9 @@ export default function TestDBPage() {
       let profileUrl = formData.profileImage;
       if (fileDataUrl) {
         setUploading(true);
+        // BACKEND_INTEGRATION_NOTE: This upload will be replaced with Express backend API call
+        // const uploadRes = await fetch('/api/upload', {
+        // TODO: Replace with: const uploadRes = await fetch('http://localhost:3001/api/upload', {
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -58,6 +64,8 @@ export default function TestDBPage() {
 
       // Determine if it's create or update
       const isUpdate = editingCustomer !== null;
+      // BACKEND_INTEGRATION_NOTE: This API call will be replaced with Express backend
+      // const url = isUpdate ? `http://localhost:3001/api/customers` : 'http://localhost:3001/api/customers';
       const url = isUpdate ? `/api/customers` : '/api/customers';
       const method = isUpdate ? 'PUT' : 'POST';
 
@@ -137,7 +145,9 @@ export default function TestDBPage() {
     if (!confirm('Are you sure you want to delete this customer?')) return;
 
     try {
-      const response = await fetch(`/api/customers?id=${id}`, {
+    // BACKEND_INTEGRATION_NOTE: This delete will be replaced with Express backend API call
+    // const response = await fetch(`http://localhost:3001/api/customers?id=${id}`, {
+    const response = await fetch(`/api/customers?id=${id}`, {
         method: 'DELETE',
       });
 
